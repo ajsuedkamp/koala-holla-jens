@@ -1,20 +1,25 @@
+
+
 console.log('js');
 
 $(document).ready(function () {
   console.log('JQ');
   // Establish Click Listeners
   setupClickListeners();
-  $('body').on('click', '.delete-koala', deleteKoala);
-
   // load existing koalas on page load
   getKoalas();
+
+  // Event delgator
+  $('body').on('click', '.delete-koala', deleteKoala);
+  $('body').on('click', '.transfer', updateKoala);
 }); // end doc ready
 
 function setupClickListeners() {
-  $('.delete-koala').on('click', deleteKoala);
   $('#addButton').on('click', function () {
     console.log('in addButton on click');
-
+    // get user input and put in an object
+    // NOT WORKING YET :(
+    // using a test object
     if ($('#genderIn').val() === '') {
       alert('Choose Male or Female');
       return;
@@ -32,26 +37,28 @@ function setupClickListeners() {
       // call saveKoala with the new obejct
       saveKoala(koalaToSend);
       emptyInputs();
-
-
     }
   });
+
+  $('.delete-koala').on('click', deleteKoala);
+
+  $('.transfer').on('click', updateKoala);
 }
 
 function deleteKoala() {
-  console.log('inDelete koala');
+  
   const koalaId = $(this).data('id');
+  console.log('deleteKoala', koalaId);
+  
   $.ajax({
     type: 'DELETE',
-    //deleting koala in /koals using koalaId
     url: `/koalas/${koalaId}`
-  }).then(function (response) {
-    console.log(response);
+  }).then(function(response){
     getKoalas();
-  }).catch(function (error) {
+  }).catch(function(error) {
     console.log(error);
-    alert('something went wrong');
-  });
+    alert('Something went wrong client DELETE');
+  })
 
 }
 
@@ -70,32 +77,28 @@ function getKoalas() {
       if (`${koala.ready}` === 'false') {
         $('#viewKoalas').append(`
         <tr>
-        <td>${koala.id}</td>
-        <td>${koala.name}</td>
-        <td>${koala.age}</td>
-        <td>${koala.gender}</td>
-        <td>${koala.ready}</td>
-        <td>${koala.notes}</td>
-        <td></td>
-        <td>
-          <button class="delete-koala" data-id="${koala.id}">Delete</button>
-        <td>
-      </tr>
+          <td>${koala.id}</td>
+          <td>${koala.name}</td>
+          <td>${koala.age}</td>
+          <td>${koala.gender}</td>
+          <td>${koala.ready}</td>
+          <td>${koala.notes}</td>
+          <td><button class="transfer" data-id="${koala.id}">Ready for Transfer</button></td>
+          <td><button class="delete-koala" data-id="${koala.id}">Delete</button></td>
+        </tr>
         `);
       } else {
         $('#viewKoalas').append(`
         <tr>
-        <td>${koala.id}</td>
-        <td>${koala.name}</td>
-        <td>${koala.age}</td>
-        <td>${koala.gender}</td>
-        <td>${koala.ready}</td>
-        <td>${koala.notes}</td>
-        <td><button class="ready-transfer" datat id="${koala.ready}">Ready for Transfer</button></td>
-        <td>
-          <button class="delete-koala" data-id="${koala.id}">Delete</button>
-        <td>
-      </tr>
+          <td>${koala.id}</td>
+          <td>${koala.name}</td>
+          <td>${koala.age}</td>
+          <td>${koala.gender}</td>
+          <td>${koala.ready}</td>
+          <td>${koala.notes}</td>
+          <td></td>
+          <td><button class="delete-koala" data-id="${koala.id}">Delete</button></td>
+        </tr>
         `);
       }
     }
@@ -104,6 +107,22 @@ function getKoalas() {
     alert('Something went wrong!')
   })
 } // end getKoalas
+
+function updateKoala () {
+  const koalaId = $(this).data('id');
+  console.log('updateKoala', koalaId);
+
+  $.ajax({
+    type: 'PUT',
+    url: `/koalas/${koalaId}`,
+  }).then(function (response) {
+    getKoalas();
+  }).catch(function (error) {
+    console.log(error);
+    alert('Something went wrong: PUT')
+  });
+
+}
 
 function saveKoala(newKoala) {
   console.log('in saveKoala', newKoala);
